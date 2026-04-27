@@ -1,6 +1,6 @@
 # 割り勘ログ
 
-彼女と使うシンプルな割り勘アプリ。Next.js + Supabase + PWA。
+彼女と使うシンプルな割り勘アプリ。Next.js + Supabase。
 
 ## 機能
 
@@ -17,7 +17,6 @@
 - Supabase (Auth + Postgres + RLS)
 - Tailwind CSS
 - date-fns
-- PWA (manifest.json + apple-web-app meta)
 
 ---
 
@@ -108,16 +107,6 @@ git push -u origin main
 
 ---
 
-## PWA としてホーム画面に追加
-
-iPhone Safari で本番 URL を開いて：
-1. 共有ボタン（□↑）をタップ
-2. 「ホーム画面に追加」を選択
-
-これでネイティブアプリっぽく使えます。彼女にも招待リンクを送って、同じく追加してもらえばOK。
-
----
-
 ## ディレクトリ構成
 
 ```
@@ -136,9 +125,9 @@ warikan/
 │   ├── supabase/               # Supabaseクライアント
 │   └── calculations.ts         # 比率・精算ロジック
 ├── supabase/
-│   └── migrations/             # DBスキーマ
-└── public/
-    └── manifest.json           # PWA設定
+│   ├── migrations/             # DBスキーマ
+│   └── tests/                  # RPC の SQL E2E テスト
+└── public/                     # 静的ファイル
 ```
 
 ---
@@ -152,16 +141,6 @@ warikan/
 - パートナーの入力をリアルタイム反映（Supabase Realtime）
 - CSVエクスポート
 - 通知（Web Push、月末リマインダー等）
-
----
-
-## アイコン用画像（後で追加）
-
-`public/icon-192.png` と `public/icon-512.png` をお好みの画像で追加してください。なくてもアプリは動きますが、PWA としてホーム画面に追加した時のアイコンが空になります。
-
-簡易的な作り方：
-- Figma や Canva で正方形の画像作成
-- もしくは https://realfavicongenerator.net などのジェネレーターを使う
 
 ---
 

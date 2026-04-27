@@ -4,21 +4,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "割り勘ログ",
   description: "彼女との支払いをシンプルに記録",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "割り勘ログ",
-  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#4F46E5",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
 };
 
 export default function RootLayout({
