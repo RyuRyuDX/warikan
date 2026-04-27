@@ -17,8 +17,8 @@ export type SettlementResult = {
   total: number;
   ownerPaid: number;
   partnerPaid: number;
-  ownerBurden: number;
-  partnerBurden: number;
+  ownerShare: number;
+  partnerShare: number;
   ownerDelta: number;
   partnerDelta: number;
   settleAmount: number;
@@ -29,7 +29,7 @@ export type SettlementResult = {
 /**
  * 月次精算を計算
  * @param expenses 該当月の支出
- * @param defaultRatio owner（自分）の負担率（0-1）
+ * @param defaultRatio owner（自分）の分担比率（0-1）
  * @param ownerId owner の user_id
  * @param partnerId partner の user_id
  */
@@ -41,16 +41,16 @@ export function calcSettlement(
 ): SettlementResult {
   let ownerPaid = 0;
   let partnerPaid = 0;
-  let ownerBurden = 0;
-  let partnerBurden = 0;
+  let ownerShare = 0;
+  let partnerShare = 0;
 
   for (const e of expenses) {
     const ratio = e.ratio_override ?? defaultRatio;
-    const ownerShare = Math.round(e.amount * ratio);
-    const partnerShare = e.amount - ownerShare;
+    const ownerOf = Math.round(e.amount * ratio);
+    const partnerOf = e.amount - ownerOf;
 
-    ownerBurden += ownerShare;
-    partnerBurden += partnerShare;
+    ownerShare += ownerOf;
+    partnerShare += partnerOf;
 
     if (e.payer_user_id === ownerId) {
       ownerPaid += e.amount;
@@ -59,8 +59,8 @@ export function calcSettlement(
     }
   }
 
-  const ownerDelta = ownerPaid - ownerBurden;
-  const partnerDelta = partnerPaid - partnerBurden;
+  const ownerDelta = ownerPaid - ownerShare;
+  const partnerDelta = partnerPaid - partnerShare;
 
   let settleAmount = 0;
   let fromUserId: string | null = null;
@@ -80,8 +80,8 @@ export function calcSettlement(
     total: ownerPaid + partnerPaid,
     ownerPaid,
     partnerPaid,
-    ownerBurden,
-    partnerBurden,
+    ownerShare,
+    partnerShare,
     ownerDelta,
     partnerDelta,
     settleAmount,

@@ -107,11 +107,11 @@ export default async function SummaryPage() {
           {members?.map((m) => {
             const paid =
               m.role === "owner" ? settlement.ownerPaid : settlement.partnerPaid;
-            const burden =
+            const share =
               m.role === "owner"
-                ? settlement.ownerBurden
-                : settlement.partnerBurden;
-            const delta = paid - burden;
+                ? settlement.ownerShare
+                : settlement.partnerShare;
+            const delta = paid - share;
             return (
               <div key={m.user_id} className="bg-gray-100 rounded-xl p-4 flex items-center">
                 <div
@@ -124,7 +124,7 @@ export default async function SummaryPage() {
                 <div className="flex-1">
                   <div className="text-xs text-gray-500">立て替え総額</div>
                   <div className="text-xs text-gray-500 mt-1">
-                    負担すべき: {formatYen(burden)} → {delta >= 0 ? "+" : ""}
+                    {m.display_name}の分: {formatYen(share)} → {delta >= 0 ? "+" : ""}
                     {formatYen(delta)}
                   </div>
                 </div>

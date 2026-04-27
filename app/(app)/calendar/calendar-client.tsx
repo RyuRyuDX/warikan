@@ -70,15 +70,15 @@ export default function CalendarClient({
     return calcSettlement(expenses, defaultRatio, owner.user_id, partner.user_id);
   }, [expenses, defaultRatio, owner, partner]);
 
-  // 自分視点の負担額（meがowner なら ownerBurden、partner なら partnerBurden）
-  const myBurden = useMemo(() => {
+  // 自分視点の分担額（me が owner なら ownerShare、partner なら partnerShare）
+  const myShare = useMemo(() => {
     if (!settlement || !me) return 0;
-    return me.role === "owner" ? settlement.ownerBurden : settlement.partnerBurden;
+    return me.role === "owner" ? settlement.ownerShare : settlement.partnerShare;
   }, [settlement, me]);
 
-  const otherBurden = useMemo(() => {
+  const otherShare = useMemo(() => {
     if (!settlement || !other) return 0;
-    return other.role === "owner" ? settlement.ownerBurden : settlement.partnerBurden;
+    return other.role === "owner" ? settlement.ownerShare : settlement.partnerShare;
   }, [settlement, other]);
 
   // 日付ごとの支出合計とカテゴリ
@@ -169,13 +169,13 @@ export default function CalendarClient({
           </div>
           <div className="border-l border-gray-300 pl-4">
             <div className="text-xs text-gray-500 mb-1">
-              あなたの負担 ({Math.round(myRatio * 100)}%)
+              あなたの分 ({Math.round(myRatio * 100)}%)
             </div>
             <div className="text-xl font-bold text-primary">
-              {formatYen(myBurden)}
+              {formatYen(myShare)}
             </div>
             <div className="text-xs text-gray-400 mt-1">
-              {other?.display_name ?? "相手"}: {formatYen(otherBurden)}
+              {other?.display_name ?? "相手"}: {formatYen(otherShare)}
             </div>
           </div>
         </div>
