@@ -23,6 +23,7 @@ export default function SummaryClient({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showOverrides, setShowOverrides] = useState(false);
 
   const monthStart = useMemo(() => startOfMonth(currentMonth), [currentMonth]);
   const monthEnd = useMemo(() => endOfMonth(currentMonth), [currentMonth]);
@@ -30,6 +31,7 @@ export default function SummaryClient({
   useEffect(() => {
     const supabase = createClient();
     setLoading(true);
+    setShowOverrides(false);
     (async () => {
       const { data } = await supabase
         .from("expenses")
@@ -59,6 +61,17 @@ export default function SummaryClient({
   const fromMember = members.find((m) => m.user_id === settlement.fromUserId);
   const toMember = members.find((m) => m.user_id === settlement.toUserId);
 
+  const ownerPct = Math.round(defaultRatio * 100);
+  const partnerPct = 100 - ownerPct;
+
+  const overrideExpenses = useMemo(
+    () =>
+      expenses
+        .filter((e) => e.ratio_override !== null)
+        .sort((a, b) => a.date.localeCompare(b.date)),
+    [expenses],
+  );
+
   // カテゴリ別集計
   const categoryRows = useMemo(() => {
     const byCategory = new Map<string, number>();
@@ -79,6 +92,8 @@ export default function SummaryClient({
   }, [expenses, categories]);
 
   const maxAmount = Math.max(...categoryRows.map((r) => r.amount), 1);
+  const hasOverrides = overrideExpenses.length > 0;
+  const hasExpenses = expenses.length > 0;
 
   return (
     <div className="max-w-md mx-auto safe-top">
@@ -103,83 +118,122 @@ export default function SummaryClient({
         </button>
       </header>
 
-      {/* 精算額 */}
-      <div className="mx-5 mb-6 bg-primary rounded-2xl p-6 text-center">
-        <div className="text-xs text-primary-200 mb-1">今月の精算額</div>
-        <div className="text-3xl font-bold text-white mb-2">
-          {formatYen(settlement.settleAmount)}
-        </div>
-        {settlement.settleAmount > 0 && fromMember && toMember ? (
-          <div className="text-xs text-primary-200">
-            {fromMember.display_name} が {toMember.display_name} に支払う
-          </div>
-        ) : (
-          <div className="text-xs text-primary-200">精算は不要だよ</div>
-        )}
-      </div>
-
-      {/* それぞれの状況 */}
+      {/* それぞれの支払い */}
       <div className="mx-5 mb-6">
-        <h2 className="text-sm font-bold mb-3">それぞれの状況</h2>
-        <div className="space-y-2">
+        <h2 className="text-sm font-bold mb-3">それぞれの支払い</h2>
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl divide-y divide-white dark:divide-zinc-700">
           {members.map((m) => {
             const paid =
               m.role === "owner" ? settlement.ownerPaid : settlement.partnerPaid;
-            const share =
-              m.role === "owner" ? settlement.ownerShare : settlement.partnerShare;
-            const delta = paid - share;
-            // delta > 0: 払いすぎ → 受け取る側 / delta < 0: 払い不足 → 渡す側
             return (
-              <div
-                key={m.user_id}
-                className="bg-gray-100 dark:bg-zinc-800 rounded-xl p-4"
-              >
-                <div className="flex items-center mb-3">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold mr-3 ${
-                      m.role === "owner" ? "bg-primary" : "bg-partner"
-                    }`}
-                  >
-                    {m.display_name.slice(0, 1)}
-                  </div>
-                  <div className="text-sm font-bold">{m.display_name}</div>
+              <div key={m.user_id} className="flex items-center p-4">
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold mr-3 ${
+                    m.role === "owner" ? "bg-primary" : "bg-partner"
+                  }`}
+                >
+                  {m.display_name.slice(0, 1)}
                 </div>
-                <div className="space-y-1.5 text-sm pl-12">
-                  <Row
-                    label="払った金額"
-                    value={formatYen(paid)}
-                  />
-                  <Row
-                    label="本来の負担分"
-                    value={formatYen(share)}
-                    muted
-                  />
-                  <div className="flex justify-between items-baseline pt-1 border-t border-gray-200 dark:border-zinc-700">
-                    <span className="text-xs text-gray-500 dark:text-zinc-400">
-                      差額
-                    </span>
-                    <span
-                      className={`text-sm font-bold ${
-                        delta > 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : delta < 0
-                            ? "text-rose-600 dark:text-rose-400"
-                            : "text-gray-500 dark:text-zinc-400"
-                      }`}
-                    >
-                      {delta === 0
-                        ? "ぴったり"
-                        : delta > 0
-                          ? `+${formatYen(delta)} 多く払った`
-                          : `${formatYen(delta)} 払い足りない`}
-                    </span>
-                  </div>
+                <div className="flex-1 text-sm font-semibold">
+                  {m.display_name}
                 </div>
+                <div className="text-base font-bold">{formatYen(paid)}</div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* 今月の総額 */}
+      <div className="mx-5 mb-6 bg-gray-100 dark:bg-zinc-800 rounded-2xl p-5">
+        <div className="text-xs text-gray-500 dark:text-zinc-400 mb-1">
+          今月の総額
+        </div>
+        <div className="text-3xl font-bold mb-2">
+          {formatYen(settlement.total)}
+        </div>
+        {hasOverrides ? (
+          <button
+            onClick={() => setShowOverrides((v) => !v)}
+            className="flex items-center gap-1 text-xs text-gray-600 dark:text-zinc-300 active:opacity-60"
+            aria-expanded={showOverrides}
+          >
+            <span>
+              比率 {ownerPct} : {partnerPct} で分けると
+            </span>
+            <span
+              className={`transition-transform inline-block ${
+                showOverrides ? "rotate-90" : ""
+              }`}
+              aria-hidden
+            >
+              ›
+            </span>
+          </button>
+        ) : (
+          <div className="text-xs text-gray-600 dark:text-zinc-300">
+            比率 {ownerPct} : {partnerPct} で分けると
+          </div>
+        )}
+
+        {hasOverrides && showOverrides && owner && partner && (
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
+            <div className="text-xs text-gray-500 dark:text-zinc-400 mb-2">
+              個別に比率を変えた支出 ({overrideExpenses.length} 件)
+            </div>
+            <ul className="space-y-2 text-xs">
+              {overrideExpenses.map((e) => {
+                const cat = categories.find((c) => c.id === e.category_id);
+                return (
+                  <li
+                    key={e.id}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-gray-500 dark:text-zinc-400 tabular-nums">
+                        {format(new Date(e.date), "M/d")}
+                      </span>
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: cat?.color ?? "#888" }}
+                      />
+                      <span className="truncate">{cat?.name ?? "未分類"}</span>
+                      <span className="text-gray-500 dark:text-zinc-400 tabular-nums">
+                        {formatYen(e.amount)}
+                      </span>
+                    </div>
+                    <span className="text-gray-700 dark:text-zinc-200 shrink-0">
+                      {formatOverride(e.ratio_override!, owner, partner)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* 精算 */}
+      {hasExpenses && (
+        <div className="mx-5 mb-6 bg-primary rounded-2xl p-6 text-center">
+          <div className="text-xs text-primary-200 mb-2">精算</div>
+          {settlement.settleAmount > 0 && fromMember && toMember ? (
+            <>
+              <div className="text-sm text-primary-200 mb-1">
+                「{fromMember.display_name}」が「{toMember.display_name}」に
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {formatYen(settlement.settleAmount)}
+              </div>
+              <div className="text-xs text-primary-200">を渡すと精算完了</div>
+            </>
+          ) : (
+            <div className="text-sm font-bold text-white">
+              今月はぴったり。精算なし。
+            </div>
+          )}
+        </div>
+      )}
 
       {/* カテゴリ別 */}
       <div className="mx-5 mb-10">
@@ -226,19 +280,14 @@ export default function SummaryClient({
   );
 }
 
-function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
-  return (
-    <div className="flex justify-between items-baseline">
-      <span className="text-xs text-gray-500 dark:text-zinc-400">{label}</span>
-      <span
-        className={`text-sm ${
-          muted
-            ? "text-gray-600 dark:text-zinc-300"
-            : "font-semibold"
-        }`}
-      >
-        {value}
-      </span>
-    </div>
-  );
+function formatOverride(
+  override: number,
+  owner: Member,
+  partner: Member,
+): string {
+  if (override === 0.5) return "折半 50:50";
+  if (override === 1) return `「${owner.display_name}」が全額`;
+  if (override === 0) return `「${partner.display_name}」が全額`;
+  const ownerPct = Math.round(override * 100);
+  return `${ownerPct} : ${100 - ownerPct}`;
 }
