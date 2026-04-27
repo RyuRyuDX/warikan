@@ -24,6 +24,12 @@ export default function SettingsClient({
   const [categories, setCategories] = useState(initialCategories);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberDisplayName, setMemberDisplayName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMessage, setPwMessage] = useState<
+    { type: "ok" | "err"; text: string } | null
+  >(null);
 
   const owner = members.find((m) => m.role === "owner");
   const partner = members.find((m) => m.role === "partner");
@@ -92,6 +98,25 @@ export default function SettingsClient({
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
+  }
+
+  async function changePassword() {
+    if (newPassword.length < 6) {
+      setPwMessage({ type: "err", text: "6 文字以上にしてください" });
+      return;
+    }
+    setPwSaving(true);
+    setPwMessage(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwSaving(false);
+    if (error) {
+      setPwMessage({ type: "err", text: error.message });
+      return;
+    }
+    setNewPassword("");
+    setShowNewPassword(false);
+    setPwMessage({ type: "ok", text: "パスワードを変更しました" });
   }
 
   const ownerPercent = Math.round(ratio * 100);
@@ -220,6 +245,53 @@ export default function SettingsClient({
           >
             <span className="text-lg mr-2">+</span>
             新しいカテゴリを追加
+          </button>
+        </div>
+      </Section>
+
+      {/* アカウント (パスワード変更) */}
+      <Section title="アカウント">
+        <div className="bg-gray-100 rounded-2xl p-4 space-y-3">
+          <div>
+            <label className="text-[10px] text-gray-500 mb-1 block">
+              新しいパスワード
+            </label>
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="6 文字以上"
+                className="w-full pl-3 pr-14 py-2.5 rounded-lg bg-white outline-none text-sm"
+                autoComplete="new-password"
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword((v) => !v)}
+                className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-1 text-[10px] font-bold text-gray-500 active:text-primary"
+                tabIndex={-1}
+                aria-label={showNewPassword ? "パスワードを隠す" : "パスワードを表示"}
+              >
+                {showNewPassword ? "隠す" : "表示"}
+              </button>
+            </div>
+          </div>
+          {pwMessage && (
+            <p
+              className={`text-xs ${
+                pwMessage.type === "ok" ? "text-primary" : "text-red-600"
+              }`}
+            >
+              {pwMessage.text}
+            </p>
+          )}
+          <button
+            onClick={changePassword}
+            disabled={pwSaving || newPassword.length < 6}
+            className="w-full py-2 bg-primary text-white text-xs font-bold rounded-lg disabled:opacity-50 active:opacity-80"
+          >
+            {pwSaving ? "変更中..." : "パスワードを変更"}
           </button>
         </div>
       </Section>
