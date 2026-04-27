@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 
 type Member = { user_id: string; display_name: string; role: "owner" | "partner" };
 type Category = { id: string; name: string; color: string; sort_order: number };
@@ -30,6 +31,16 @@ export default function SettingsClient({
   const [pwMessage, setPwMessage] = useState<
     { type: "ok" | "err"; text: string } | null
   >(null);
+  const [theme, setTheme] = useState<Theme>("system");
+
+  useEffect(() => {
+    setTheme(getStoredTheme());
+  }, []);
+
+  function handleSelectTheme(next: Theme) {
+    setTheme(next);
+    applyTheme(next);
+  }
 
   const owner = members.find((m) => m.role === "owner");
   const partner = members.find((m) => m.role === "partner");
@@ -129,7 +140,7 @@ export default function SettingsClient({
         <h1 className="text-xl font-bold">設定</h1>
         <button
           onClick={logout}
-          className="text-xs text-gray-500 px-2"
+          className="text-xs text-gray-500 dark:text-zinc-400 px-2"
         >
           ログアウト
         </button>
@@ -137,7 +148,7 @@ export default function SettingsClient({
 
       {/* プロフィール */}
       <Section title="プロフィール">
-        <div className="bg-gray-100 rounded-2xl divide-y divide-white">
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl divide-y divide-white dark:divide-zinc-700">
           {members.map((m) => {
             const isMe = m.user_id === currentUserId;
             const isEditing = editingMemberId === m.user_id;
@@ -151,7 +162,7 @@ export default function SettingsClient({
                   {m.display_name.slice(0, 1)}
                 </div>
                 <div className="flex-1">
-                  <div className="text-[10px] text-gray-500">
+                  <div className="text-[10px] text-gray-500 dark:text-zinc-400">
                     {m.role === "owner" ? "あなた" : "パートナー"}
                   </div>
                   {isEditing ? (
@@ -168,7 +179,7 @@ export default function SettingsClient({
                         }
                       }}
                       maxLength={20}
-                      className="w-full bg-white rounded px-2 py-0.5 text-sm font-semibold outline-none"
+                      className="w-full bg-white dark:bg-zinc-900 rounded px-2 py-0.5 text-sm font-semibold outline-none"
                       autoFocus
                     />
                   ) : (
@@ -190,7 +201,7 @@ export default function SettingsClient({
             );
           })}
           {members.length === 1 && (
-            <div className="p-4 text-xs text-gray-500">
+            <div className="p-4 text-xs text-gray-500 dark:text-zinc-400">
               パートナーはまだ参加していません。下の招待リンクを共有してください。
             </div>
           )}
@@ -199,7 +210,7 @@ export default function SettingsClient({
 
       {/* デフォルト比率 */}
       <Section title="デフォルト比率">
-        <div className="bg-gray-100 rounded-2xl p-5">
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl p-5">
           <div className="flex justify-between text-sm font-bold mb-3">
             <span>{owner?.display_name ?? "あなた"} {ownerPercent}%</span>
             <span>{partner?.display_name ?? "パートナー"} {partnerPercent}%</span>
@@ -213,7 +224,7 @@ export default function SettingsClient({
             onChange={(e) => saveRatio(parseInt(e.target.value, 10) / 100)}
             className="w-full accent-primary"
           />
-          <div className="flex justify-between text-[10px] text-gray-500 mt-2">
+          <div className="flex justify-between text-[10px] text-gray-500 dark:text-zinc-400 mt-2">
             <span>あなたが多い</span>
             <span>パートナーが多い</span>
           </div>
@@ -222,10 +233,10 @@ export default function SettingsClient({
 
       {/* カテゴリ管理 */}
       <Section title="カテゴリ管理">
-        <div className="bg-gray-100 rounded-2xl divide-y divide-white">
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl divide-y divide-white dark:divide-zinc-700">
           {categories.map((c) => (
             <div key={c.id} className="flex items-center p-3">
-              <span className="text-gray-300 text-lg mr-3">≡</span>
+              <span className="text-gray-300 dark:text-zinc-600 text-lg mr-3">≡</span>
               <span
                 className="w-3 h-3 rounded-full mr-3"
                 style={{ backgroundColor: c.color }}
@@ -233,7 +244,7 @@ export default function SettingsClient({
               <span className="flex-1 text-sm">{c.name}</span>
               <button
                 onClick={() => deleteCategory(c.id)}
-                className="text-xs text-red-500 px-2"
+                className="text-xs text-red-500 dark:text-red-400 px-2"
               >
                 削除
               </button>
@@ -249,11 +260,39 @@ export default function SettingsClient({
         </div>
       </Section>
 
+      {/* 表示モード */}
+      <Section title="表示モード">
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl p-1 grid grid-cols-3 gap-1">
+          {(
+            [
+              { value: "light" as const, label: "ライト" },
+              { value: "system" as const, label: "システム" },
+              { value: "dark" as const, label: "ダーク" },
+            ]
+          ).map((opt) => {
+            const selected = theme === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => handleSelectTheme(opt.value)}
+                className={`py-2.5 rounded-lg text-sm font-bold transition ${
+                  selected
+                    ? "bg-white dark:bg-zinc-900 text-primary shadow-sm"
+                    : "text-gray-600 dark:text-zinc-300"
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </Section>
+
       {/* アカウント (パスワード変更) */}
       <Section title="アカウント">
-        <div className="bg-gray-100 rounded-2xl p-4 space-y-3">
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl p-4 space-y-3">
           <div>
-            <label className="text-[10px] text-gray-500 mb-1 block">
+            <label className="text-[10px] text-gray-500 dark:text-zinc-400 mb-1 block">
               新しいパスワード
             </label>
             <div className="relative">
@@ -262,14 +301,14 @@ export default function SettingsClient({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="6 文字以上"
-                className="w-full pl-3 pr-14 py-2.5 rounded-lg bg-white outline-none text-sm"
+                className="w-full pl-3 pr-14 py-2.5 rounded-lg bg-white dark:bg-zinc-900 outline-none text-sm"
                 autoComplete="new-password"
                 minLength={6}
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword((v) => !v)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-1 text-[10px] font-bold text-gray-500 active:text-primary"
+                className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-1 text-[10px] font-bold text-gray-500 dark:text-zinc-400 active:text-primary"
                 tabIndex={-1}
                 aria-label={showNewPassword ? "パスワードを隠す" : "パスワードを表示"}
               >
@@ -280,7 +319,7 @@ export default function SettingsClient({
           {pwMessage && (
             <p
               className={`text-xs ${
-                pwMessage.type === "ok" ? "text-primary" : "text-red-600"
+                pwMessage.type === "ok" ? "text-primary" : "text-red-600 dark:text-red-400"
               }`}
             >
               {pwMessage.text}
@@ -298,10 +337,10 @@ export default function SettingsClient({
 
       {/* 招待 */}
       <Section title="カップル招待">
-        <div className="bg-gray-100 rounded-2xl p-4 space-y-3">
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl p-4 space-y-3">
           <div>
-            <div className="text-[10px] text-gray-500 mb-1">招待リンク</div>
-            <div className="text-xs font-mono break-all bg-white rounded-lg p-2">
+            <div className="text-[10px] text-gray-500 dark:text-zinc-400 mb-1">招待リンク</div>
+            <div className="text-xs font-mono break-all bg-white dark:bg-zinc-900 rounded-lg p-2">
               {inviteUrl}
             </div>
           </div>
@@ -319,7 +358,7 @@ export default function SettingsClient({
               再発行
             </button>
           </div>
-          <p className="text-[10px] text-gray-400 italic">
+          <p className="text-[10px] text-gray-400 dark:text-zinc-500 italic">
             ※ 再発行すると前のリンクは無効になります
           </p>
         </div>
@@ -337,7 +376,7 @@ function Section({
 }) {
   return (
     <div className="mx-5 mb-6">
-      <h2 className="text-xs font-bold text-gray-500 mb-2 px-1">{title}</h2>
+      <h2 className="text-xs font-bold text-gray-500 dark:text-zinc-400 mb-2 px-1">{title}</h2>
       {children}
     </div>
   );

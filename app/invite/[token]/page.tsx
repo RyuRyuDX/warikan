@@ -52,7 +52,7 @@ export default function InvitePage({
 
   if (authChecking) {
     return (
-      <div className="min-h-dvh flex items-center justify-center text-sm text-gray-400">
+      <div className="min-h-dvh flex items-center justify-center text-sm text-gray-400 dark:text-zinc-500">
         確認中...
       </div>
     );
@@ -61,9 +61,9 @@ export default function InvitePage({
   if (needsLogin) {
     return (
       <div className="min-h-dvh flex items-center justify-center p-6">
-        <div className="w-full max-w-sm bg-white rounded-2xl p-8 shadow-sm">
+        <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-sm">
           <h1 className="text-xl font-bold mb-2">カップルに招待されました</h1>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
             参加するには、まずログインしてください。
           </p>
           <button
@@ -79,9 +79,9 @@ export default function InvitePage({
 
   return (
     <div className="min-h-dvh flex items-center justify-center p-6">
-      <div className="w-full max-w-sm bg-white rounded-2xl p-8 shadow-sm">
+      <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-sm">
         <h1 className="text-xl font-bold mb-2">カップルに参加</h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
           表示名を決めてください。後から変更できます。
         </p>
 
@@ -91,11 +91,11 @@ export default function InvitePage({
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="例: あい"
           maxLength={20}
-          className="w-full px-4 py-3 rounded-xl bg-gray-100 mb-4 outline-none focus:ring-2 focus:ring-primary"
+          className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-zinc-800 mb-4 outline-none focus:ring-2 focus:ring-primary"
           autoFocus
         />
 
-        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+        {error && <p className="text-sm text-red-600 dark:text-red-400 mb-3">{error}</p>}
 
         <button
           onClick={handleJoin}

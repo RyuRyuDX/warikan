@@ -24,7 +24,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-dvh flex flex-col">
       <main className="flex-1 pb-24">{children}</main>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 safe-bottom">
         <div className="flex justify-around py-2 max-w-md mx-auto">
           <TabLink href="/calendar" label="カレンダー" icon="📅" />
           <TabLink href="/summary" label="サマリー" icon="📊" />

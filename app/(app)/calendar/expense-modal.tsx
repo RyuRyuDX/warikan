@@ -163,11 +163,11 @@ export default function ExpenseModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
-      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90dvh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 dark:bg-black/60">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90dvh] flex flex-col">
         {/* ヘッダー (常時表示。iOS Safari の sticky 不具合を避けるため flex で固定) */}
-        <div className="bg-white border-b border-gray-200 flex items-center justify-between px-5 py-4 rounded-t-3xl flex-shrink-0">
-          <button onClick={onClose} className="text-gray-500 text-sm">
+        <div className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between px-5 py-4 rounded-t-3xl flex-shrink-0">
+          <button onClick={onClose} className="text-gray-500 dark:text-zinc-400 text-sm">
             キャンセル
           </button>
           <h2 className="font-bold">
@@ -185,20 +185,20 @@ export default function ExpenseModal({
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* 日付 */}
           <div>
-            <label className="text-xs text-gray-500 mb-2 block">日付</label>
+            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-2 block">日付</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-gray-100 outline-none"
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-zinc-800 outline-none"
             />
           </div>
 
           {/* 金額 */}
           <div>
-            <label className="text-xs text-gray-500 mb-2 block">金額</label>
-            <div className="bg-gray-100 rounded-xl px-4 py-5 flex items-center justify-center">
-              <span className="text-3xl font-bold text-gray-600 mr-2">¥</span>
+            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-2 block">金額</label>
+            <div className="bg-gray-100 dark:bg-zinc-800 rounded-xl px-4 py-5 flex items-center justify-center">
+              <span className="text-3xl font-bold text-gray-600 dark:text-zinc-300 mr-2">¥</span>
               <input
                 type="text"
                 inputMode="numeric"
@@ -216,7 +216,7 @@ export default function ExpenseModal({
 
           {/* カテゴリ */}
           <div>
-            <label className="text-xs text-gray-500 mb-2 block">カテゴリ</label>
+            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-2 block">カテゴリ</label>
             <div className="flex flex-wrap gap-2">
               {categories.map((c) => {
                 const selected = c.id === categoryId;
@@ -225,7 +225,7 @@ export default function ExpenseModal({
                     key={c.id}
                     onClick={() => setCategoryId(c.id)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
-                      selected ? "text-white" : "bg-gray-100 text-gray-600"
+                      selected ? "text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300"
                     }`}
                     style={selected ? { backgroundColor: c.color } : {}}
                   >
@@ -238,10 +238,10 @@ export default function ExpenseModal({
 
           {/* 立て替えた人 */}
           <div>
-            <label className="text-xs text-gray-500 mb-2 block">
+            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-2 block">
               立て替えた人
             </label>
-            <div className="bg-gray-100 rounded-xl p-1 grid grid-cols-2 gap-1">
+            <div className="bg-gray-100 dark:bg-zinc-800 rounded-xl p-1 grid grid-cols-2 gap-1">
               {members.map((m) => {
                 const selected = m.user_id === payerId;
                 return (
@@ -251,7 +251,7 @@ export default function ExpenseModal({
                     className={`py-2.5 rounded-lg text-sm font-bold transition ${
                       selected
                         ? "bg-primary text-white"
-                        : "text-gray-600"
+                        : "text-gray-600 dark:text-zinc-300"
                     }`}
                   >
                     {m.display_name}
@@ -263,7 +263,7 @@ export default function ExpenseModal({
 
           {/* 比率 */}
           <div>
-            <label className="text-xs text-gray-500 mb-2 block">この支出の比率</label>
+            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-2 block">この支出の比率</label>
             <div className="grid grid-cols-2 gap-2">
               {(
                 [
@@ -281,7 +281,7 @@ export default function ExpenseModal({
                     className={`py-2.5 px-3 rounded-xl text-xs font-bold transition ${
                       selected
                         ? "bg-primary text-white"
-                        : "bg-gray-100 text-gray-600"
+                        : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300"
                     }`}
                   >
                     {opt.label}
@@ -293,15 +293,15 @@ export default function ExpenseModal({
                 className={`col-span-2 py-2.5 px-3 rounded-xl text-xs font-bold transition ${
                   ratioMode === "custom"
                     ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600"
+                    : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300"
                 }`}
               >
                 カスタム…
               </button>
             </div>
             {ratioMode === "custom" && (
-              <div className="mt-3 bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+              <div className="mt-3 bg-gray-50 dark:bg-zinc-900 rounded-xl p-4">
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 mb-2">
                   <span>自分: {customMe}%</span>
                   <span>相手: {100 - customMe}%</span>
                 </div>
@@ -320,7 +320,7 @@ export default function ExpenseModal({
 
           {/* 比率プレビュー */}
           {amountNum > 0 && owner && partner && (
-            <div className="bg-primary-50 border border-primary-200 rounded-xl p-4">
+            <div className="bg-primary-50 dark:bg-primary/15 border border-primary-200 dark:border-primary/40 rounded-xl p-4">
               <div className="text-xs text-primary font-bold mb-1">
                 {ratioOverride === null ? "⚡" : "🔧"}{" "}
                 {Math.round(effectiveRatio * 100)}:
@@ -336,7 +336,7 @@ export default function ExpenseModal({
 
           {/* メモ */}
           <div>
-            <label className="text-xs text-gray-500 mb-2 block">
+            <label className="text-xs text-gray-500 dark:text-zinc-400 mb-2 block">
               メモ (任意)
             </label>
             <input
@@ -344,18 +344,18 @@ export default function ExpenseModal({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="スーパーまとめ買い..."
-              className="w-full px-4 py-3 rounded-xl bg-gray-100 outline-none"
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-zinc-800 outline-none"
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
           {/* 削除ボタン (編集時のみ) */}
           {editing && (
             <button
               onClick={handleDelete}
               disabled={saving}
-              className="w-full py-3 text-red-600 font-semibold border border-red-200 rounded-xl active:bg-red-50"
+              className="w-full py-3 text-red-600 dark:text-red-400 font-semibold border border-red-200 dark:border-red-900/40 rounded-xl active:bg-red-50 dark:active:bg-red-950/30"
             >
               この支出を削除
             </button>

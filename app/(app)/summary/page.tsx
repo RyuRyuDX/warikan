@@ -113,7 +113,7 @@ export default async function SummaryPage() {
                 : settlement.partnerShare;
             const delta = paid - share;
             return (
-              <div key={m.user_id} className="bg-gray-100 rounded-xl p-4 flex items-center">
+              <div key={m.user_id} className="bg-gray-100 dark:bg-zinc-800 rounded-xl p-4 flex items-center">
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3 ${
                     m.role === "owner" ? "bg-primary" : "bg-partner"
@@ -122,8 +122,8 @@ export default async function SummaryPage() {
                   {m.display_name.slice(0, 1)}
                 </div>
                 <div className="flex-1">
-                  <div className="text-xs text-gray-500">立て替え総額</div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-zinc-400">立て替え総額</div>
+                  <div className="text-xs text-gray-500 dark:text-zinc-400 mt-1">
                     {m.display_name}の分: {formatYen(share)} → {delta >= 0 ? "+" : ""}
                     {formatYen(delta)}
                   </div>
@@ -140,7 +140,7 @@ export default async function SummaryPage() {
         <h2 className="text-sm font-bold mb-3">カテゴリ別内訳</h2>
         <div className="space-y-3">
           {categoryRows.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">
+            <p className="text-sm text-gray-400 dark:text-zinc-500 text-center py-6">
               今月の支出はまだありません
             </p>
           ) : (
@@ -154,11 +154,11 @@ export default async function SummaryPage() {
                     />
                     <span>{r.name}</span>
                   </div>
-                  <span className="text-gray-600 font-semibold">
+                  <span className="text-gray-600 dark:text-zinc-300 font-semibold">
                     {formatYen(r.amount)}
                   </span>
                 </div>
-                <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -177,7 +177,7 @@ export default async function SummaryPage() {
         <button className="w-full py-3.5 bg-primary text-white font-bold rounded-xl active:opacity-80">
           精算済みにする
         </button>
-        <p className="text-[10px] text-gray-400 text-center mt-2">
+        <p className="text-[10px] text-gray-400 dark:text-zinc-500 text-center mt-2">
           ※ 履歴に記録され、来月リセットされます
         </p>
       </div>

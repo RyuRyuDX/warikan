@@ -20,7 +20,7 @@ function TabIndicator({
   return (
     <span
       className={`flex flex-col items-center gap-1 px-6 py-1 transition-colors ${
-        highlight ? "text-primary" : "text-gray-500"
+        highlight ? "text-primary" : "text-gray-500 dark:text-zinc-400"
       }`}
     >
       <span className={`text-lg ${pending ? "opacity-60" : ""}`}>{icon}</span>
