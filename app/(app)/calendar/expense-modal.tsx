@@ -164,9 +164,9 @@ export default function ExpenseModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
-      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto">
-        {/* ヘッダー */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 flex items-center justify-between px-5 py-4">
+      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90dvh] flex flex-col">
+        {/* ヘッダー (常時表示。iOS Safari の sticky 不具合を避けるため flex で固定) */}
+        <div className="bg-white border-b border-gray-200 flex items-center justify-between px-5 py-4 rounded-t-3xl flex-shrink-0">
           <button onClick={onClose} className="text-gray-500 text-sm">
             キャンセル
           </button>
@@ -182,7 +182,7 @@ export default function ExpenseModal({
           </button>
         </div>
 
-        <div className="p-5 space-y-5">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* 日付 */}
           <div>
             <label className="text-xs text-gray-500 mb-2 block">日付</label>
