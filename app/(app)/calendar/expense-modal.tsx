@@ -9,6 +9,43 @@ import { formatYen, type Expense } from "@/lib/calculations";
 type Member = { user_id: string; display_name: string; role: "owner" | "partner" };
 type Category = { id: string; name: string; color: string };
 
+type RatioMode = "default" | "half" | "me_all" | "other_all" | "custom";
+
+// editing.ratio_override (= owner 分担比率) から UI 用のモードを逆算する
+function deriveRatioMode(
+  override: number | null | undefined,
+  meRole: "owner" | "partner" | null
+): { mode: RatioMode; customMe: number } {
+  if (override === null || override === undefined) {
+    return { mode: "default", customMe: 50 };
+  }
+  if (override === 0.5) return { mode: "half", customMe: 50 };
+  if (override === 1) {
+    return { mode: meRole === "owner" ? "me_all" : "other_all", customMe: 100 };
+  }
+  if (override === 0) {
+    return { mode: meRole === "owner" ? "other_all" : "me_all", customMe: 0 };
+  }
+  // それ以外はカスタム。me 視点 (%) に変換
+  const meRatio = meRole === "owner" ? override : 1 - override;
+  return { mode: "custom", customMe: Math.round(meRatio * 100) };
+}
+
+// UI モードと me の role から DB 保存用の owner 分担比率 (0-1 or null) を計算
+function ratioModeToOverride(
+  mode: RatioMode,
+  customMe: number,
+  meRole: "owner" | "partner" | null
+): number | null {
+  if (mode === "default") return null;
+  if (mode === "half") return 0.5;
+  if (mode === "me_all") return meRole === "owner" ? 1 : 0;
+  if (mode === "other_all") return meRole === "owner" ? 0 : 1;
+  // custom: customMe (%) は me 視点。owner 視点に変換
+  const meRatio = customMe / 100;
+  return meRole === "owner" ? meRatio : 1 - meRatio;
+}
+
 export default function ExpenseModal({
   coupleId,
   currentUserId,
@@ -30,6 +67,11 @@ export default function ExpenseModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const me = members.find((m) => m.user_id === currentUserId);
+  const meRole = me?.role ?? null;
+
+  const initialRatio = deriveRatioMode(editing?.ratio_override ?? null, meRole);
+
   const [date, setDate] = useState(format(initialDate, "yyyy-MM-dd"));
   const [amount, setAmount] = useState<string>(
     editing ? String(editing.amount) : ""
@@ -41,12 +83,18 @@ export default function ExpenseModal({
     editing?.payer_user_id ?? currentUserId
   );
   const [note, setNote] = useState("");
+  const [ratioMode, setRatioMode] = useState<RatioMode>(initialRatio.mode);
+  const [customMe, setCustomMe] = useState<number>(initialRatio.customMe);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const owner = members.find((m) => m.role === "owner");
+  const partner = members.find((m) => m.role === "partner");
   const amountNum = parseInt(amount.replace(/[^0-9]/g, "") || "0", 10);
-  const ownerShare = Math.round(amountNum * defaultRatio);
+
+  const ratioOverride = ratioModeToOverride(ratioMode, customMe, meRole);
+  const effectiveRatio = ratioOverride ?? defaultRatio;
+  const ownerShare = Math.round(amountNum * effectiveRatio);
   const partnerShare = amountNum - ownerShare;
 
   async function handleSave() {
@@ -63,6 +111,7 @@ export default function ExpenseModal({
           amount: amountNum,
           category_id: categoryId,
           payer_user_id: payerId,
+          ratio_override: ratioOverride,
           note: note || null,
         })
         .eq("id", editing.id);
@@ -79,6 +128,7 @@ export default function ExpenseModal({
         amount: amountNum,
         category_id: categoryId,
         payer_user_id: payerId,
+        ratio_override: ratioOverride,
         note: note || null,
         created_by: currentUserId,
       });
@@ -107,6 +157,10 @@ export default function ExpenseModal({
       onSaved();
     }
   }
+
+  const defaultMePct = Math.round(
+    (meRole === "owner" ? defaultRatio : 1 - defaultRatio) * 100
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
@@ -207,17 +261,75 @@ export default function ExpenseModal({
             </div>
           </div>
 
+          {/* 比率 */}
+          <div>
+            <label className="text-xs text-gray-500 mb-2 block">この支出の比率</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(
+                [
+                  { mode: "default" as const, label: `デフォルト (${defaultMePct}:${100 - defaultMePct})` },
+                  { mode: "half" as const, label: "折半 50:50" },
+                  { mode: "me_all" as const, label: "自分が全額" },
+                  { mode: "other_all" as const, label: "相手が全額" },
+                ]
+              ).map((opt) => {
+                const selected = ratioMode === opt.mode;
+                return (
+                  <button
+                    key={opt.mode}
+                    onClick={() => setRatioMode(opt.mode)}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold transition ${
+                      selected
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => setRatioMode("custom")}
+                className={`col-span-2 py-2.5 px-3 rounded-xl text-xs font-bold transition ${
+                  ratioMode === "custom"
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                カスタム…
+              </button>
+            </div>
+            {ratioMode === "custom" && (
+              <div className="mt-3 bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                  <span>自分: {customMe}%</span>
+                  <span>相手: {100 - customMe}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={customMe}
+                  onChange={(e) => setCustomMe(Number(e.target.value))}
+                  className="w-full accent-primary"
+                />
+              </div>
+            )}
+          </div>
+
           {/* 比率プレビュー */}
-          {amountNum > 0 && owner && (
+          {amountNum > 0 && owner && partner && (
             <div className="bg-primary-50 border border-primary-200 rounded-xl p-4">
               <div className="text-xs text-primary font-bold mb-1">
-                ⚡ {Math.round(defaultRatio * 100)}:
-                {Math.round((1 - defaultRatio) * 100)}で自動分割
+                {ratioOverride === null ? "⚡" : "🔧"}{" "}
+                {Math.round(effectiveRatio * 100)}:
+                {Math.round((1 - effectiveRatio) * 100)} で分割
+                {ratioOverride !== null && " (この支出のみ)"}
               </div>
               <div className="text-sm">
                 {owner.display_name}: {formatYen(ownerShare)} /{" "}
-                {members.find((m) => m.role === "partner")?.display_name ?? "相手"}:{" "}
-                {formatYen(partnerShare)}
+                {partner.display_name}: {formatYen(partnerShare)}
               </div>
             </div>
           )}
