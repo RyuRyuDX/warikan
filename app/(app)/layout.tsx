@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import TabLink from "./tab-link";
 
 export default async function AppLayout({
   children,
@@ -32,25 +32,5 @@ export default async function AppLayout({
         </div>
       </nav>
     </div>
-  );
-}
-
-function TabLink({
-  href,
-  label,
-  icon,
-}: {
-  href: string;
-  label: string;
-  icon: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex flex-col items-center gap-1 px-6 py-1 text-gray-500 active:text-primary"
-    >
-      <span className="text-lg">{icon}</span>
-      <span className="text-[10px] font-semibold">{label}</span>
-    </Link>
   );
 }
