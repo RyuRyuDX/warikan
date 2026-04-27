@@ -174,6 +174,11 @@ warikan/
 - Supabase の Redirect URLs に該当ドメインが追加されているか
 - 既に2人埋まっていないか
 
+### `Could not find the function public.create_couple(p_display_name) in the schema cache`
+表示名を決めて「始める」を押した時に出る場合：
+- `supabase/migrations/0002_fix_create_couple.sql` の中身を SQL Editor にコピペして実行
+- 旧バージョンのパラメータ名 (`display_name` 等) で作られた関数を作り直し、PostgREST のスキーマキャッシュを再読込する
+
 ---
 
 ## ライセンス
