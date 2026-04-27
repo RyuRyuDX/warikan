@@ -5,6 +5,7 @@ export type Expense = {
   payer_user_id: string;
   ratio_override: number | null;
   category_id: string;
+  note: string | null;
 };
 
 export type CoupleMember = {

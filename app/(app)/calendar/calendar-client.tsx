@@ -55,7 +55,7 @@ export default function CalendarClient({
     (async () => {
       const { data } = await supabase
         .from("expenses")
-        .select("id, date, amount, payer_user_id, ratio_override, category_id")
+        .select("id, date, amount, payer_user_id, ratio_override, category_id, note")
         .eq("couple_id", coupleId)
         .gte("date", format(monthStart, "yyyy-MM-dd"))
         .lte("date", format(monthEnd, "yyyy-MM-dd"))
@@ -122,7 +122,7 @@ export default function CalendarClient({
     const supabase = createClient();
     const { data } = await supabase
       .from("expenses")
-      .select("id, date, amount, payer_user_id, ratio_override, category_id")
+      .select("id, date, amount, payer_user_id, ratio_override, category_id, note")
       .eq("couple_id", coupleId)
       .gte("date", format(monthStart, "yyyy-MM-dd"))
       .lte("date", format(monthEnd, "yyyy-MM-dd"))
@@ -282,8 +282,15 @@ export default function CalendarClient({
                     className="w-2.5 h-2.5 rounded-full mr-3"
                     style={{ backgroundColor: cat?.color ?? "#888" }}
                   />
-                  <div className="flex-1 text-left">
-                    <div className="text-sm font-semibold">{cat?.name}</div>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="text-sm font-semibold flex items-center gap-2">
+                      <span>{cat?.name}</span>
+                      {e.note && (
+                        <span className="text-xs font-normal text-gray-500 truncate">
+                          {e.note}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs text-gray-500">
                       {payer?.display_name ?? "?"}が立て替え
                     </div>
