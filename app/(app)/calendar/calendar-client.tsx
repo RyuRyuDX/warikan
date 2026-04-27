@@ -141,7 +141,7 @@ export default function CalendarClient({
       <header className="flex items-center justify-between px-5 pt-6 pb-4">
         <button
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="text-2xl text-gray-400 px-2"
+          className="text-2xl text-gray-400 dark:text-zinc-500 px-2"
           aria-label="前の月"
         >
           ‹
@@ -151,7 +151,7 @@ export default function CalendarClient({
         </h1>
         <button
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="text-2xl text-gray-400 px-2"
+          className="text-2xl text-gray-400 dark:text-zinc-500 px-2"
           aria-label="次の月"
         >
           ›
@@ -159,22 +159,22 @@ export default function CalendarClient({
       </header>
 
       {/* サマリーカード */}
-      <div className="mx-5 mb-6 bg-gray-100 rounded-2xl p-5">
+      <div className="mx-5 mb-6 bg-gray-100 dark:bg-zinc-800 rounded-2xl p-5">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <div className="text-xs text-gray-500 mb-1">今月の支出合計</div>
+            <div className="text-xs text-gray-500 dark:text-zinc-400 mb-1">今月の支出合計</div>
             <div className="text-2xl font-bold">
               {formatYen(settlement?.total ?? 0)}
             </div>
           </div>
-          <div className="border-l border-gray-300 pl-4">
-            <div className="text-xs text-gray-500 mb-1">
+          <div className="border-l border-gray-300 dark:border-zinc-700 pl-4">
+            <div className="text-xs text-gray-500 dark:text-zinc-400 mb-1">
               あなたの分 ({Math.round(myRatio * 100)}%)
             </div>
             <div className="text-xl font-bold text-primary">
               {formatYen(myShare)}
             </div>
-            <div className="text-xs text-gray-400 mt-1">
+            <div className="text-xs text-gray-400 dark:text-zinc-500 mt-1">
               {other?.display_name ?? "相手"}: {formatYen(otherShare)}
             </div>
           </div>
@@ -187,7 +187,7 @@ export default function CalendarClient({
           <div
             key={d}
             className={`text-center text-xs font-bold ${
-              i === 0 ? "text-red-500" : i === 6 ? "text-blue-500" : "text-gray-500"
+              i === 0 ? "text-red-500 dark:text-red-400" : i === 6 ? "text-blue-500 dark:text-blue-400" : "text-gray-500 dark:text-zinc-400"
             }`}
           >
             {d}
@@ -206,12 +206,12 @@ export default function CalendarClient({
           const dayOfWeek = getDay(d);
           const dayColor =
             !inMonth
-              ? "text-gray-300"
+              ? "text-gray-300 dark:text-zinc-600"
               : dayOfWeek === 0
-                ? "text-red-500"
+                ? "text-red-500 dark:text-red-400"
                 : dayOfWeek === 6
-                  ? "text-blue-500"
-                  : "text-gray-800";
+                  ? "text-blue-500 dark:text-blue-400"
+                  : "text-gray-800 dark:text-zinc-100";
           const category = expense
             ? categories.find((c) => c.id === expense.categoryId)
             : null;
@@ -227,7 +227,7 @@ export default function CalendarClient({
                   isToday
                     ? "bg-primary text-white font-bold"
                     : isSelected && inMonth
-                      ? "bg-primary-100 text-primary font-bold"
+                      ? "bg-primary-100 dark:bg-primary/20 text-primary font-bold"
                       : dayColor
                 }`}
               >
@@ -257,7 +257,7 @@ export default function CalendarClient({
               className="w-2.5 h-2.5 rounded-full"
               style={{ backgroundColor: c.color }}
             />
-            <span className="text-xs text-gray-600">{c.name}</span>
+            <span className="text-xs text-gray-600 dark:text-zinc-300">{c.name}</span>
           </div>
         ))}
       </div>
@@ -265,7 +265,7 @@ export default function CalendarClient({
       {/* 選択日の支出一覧 */}
       {selectedDate && selectedDayExpenses.length > 0 && (
         <div className="mx-5 mb-6">
-          <h3 className="text-sm font-bold mb-2 text-gray-700">
+          <h3 className="text-sm font-bold mb-2 text-gray-700 dark:text-zinc-200">
             {format(selectedDate, "M月d日 (E)", { locale: ja })}
           </h3>
           <div className="space-y-2">
@@ -276,7 +276,7 @@ export default function CalendarClient({
                 <button
                   key={e.id}
                   onClick={() => openEditModal(e)}
-                  className="w-full flex items-center bg-white rounded-xl p-3 active:opacity-70"
+                  className="w-full flex items-center bg-white dark:bg-zinc-900 rounded-xl p-3 active:opacity-70"
                 >
                   <span
                     className="w-2.5 h-2.5 rounded-full mr-3"
@@ -286,12 +286,12 @@ export default function CalendarClient({
                     <div className="text-sm font-semibold flex items-center gap-2">
                       <span>{cat?.name}</span>
                       {e.note && (
-                        <span className="text-xs font-normal text-gray-500 truncate">
+                        <span className="text-xs font-normal text-gray-500 dark:text-zinc-400 truncate">
                           {e.note}
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-zinc-400">
                       {payer?.display_name ?? "?"}が立て替え
                     </div>
                   </div>

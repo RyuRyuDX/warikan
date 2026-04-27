@@ -41,20 +41,20 @@ export default function LoginPage() {
   return (
     <div className="min-h-dvh flex items-center justify-center p-6">
       {loading && <LoadingOverlay mode={mode} />}
-      <div className="w-full max-w-sm bg-white rounded-2xl p-8 shadow-sm">
+      <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-sm">
         <h1 className="text-2xl font-bold mb-2">割り勘ログ</h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
           {mode === "signin"
             ? "メールアドレスとパスワードでログイン"
             : "新規アカウントを作成"}
         </p>
 
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 text-sm font-bold">
+        <div className="flex gap-1 bg-gray-100 dark:bg-zinc-800 rounded-xl p-1 mb-6 text-sm font-bold">
           <button
             type="button"
             onClick={() => setMode("signin")}
             className={`flex-1 py-2 rounded-lg transition-colors ${
-              mode === "signin" ? "bg-white text-primary shadow-sm" : "text-gray-500"
+              mode === "signin" ? "bg-white dark:bg-zinc-900 text-primary shadow-sm" : "text-gray-500 dark:text-zinc-400"
             }`}
           >
             ログイン
@@ -63,7 +63,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => setMode("signup")}
             className={`flex-1 py-2 rounded-lg transition-colors ${
-              mode === "signup" ? "bg-white text-primary shadow-sm" : "text-gray-500"
+              mode === "signup" ? "bg-white dark:bg-zinc-900 text-primary shadow-sm" : "text-gray-500 dark:text-zinc-400"
             }`}
           >
             新規登録
@@ -76,7 +76,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-4 py-3 rounded-xl bg-gray-100 outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-zinc-800 outline-none focus:ring-2 focus:ring-primary"
             autoComplete="email"
             required
             autoFocus
@@ -88,7 +88,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="パスワード"
-              className="w-full pl-4 pr-16 py-3 rounded-xl bg-gray-100 outline-none focus:ring-2 focus:ring-primary"
+              className="w-full pl-4 pr-16 py-3 rounded-xl bg-gray-100 dark:bg-zinc-800 outline-none focus:ring-2 focus:ring-primary"
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
               minLength={6}
               required
@@ -96,7 +96,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-2 text-xs font-bold text-gray-500 active:text-primary"
+              className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-2 text-xs font-bold text-gray-500 dark:text-zinc-400 active:text-primary"
               tabIndex={-1}
               aria-label={showPassword ? "パスワードを隠す" : "パスワードを表示"}
             >
@@ -105,12 +105,12 @@ export default function LoginPage() {
           </div>
 
           {mode === "signup" && (
-            <p className="text-xs text-gray-500 px-1">
-              6 文字以上。半角英字・数字・記号が使えます（例: <code className="bg-gray-100 px-1 rounded">MyPass2026!</code>）
+            <p className="text-xs text-gray-500 dark:text-zinc-400 px-1">
+              6 文字以上。半角英字・数字・記号が使えます（例: <code className="bg-gray-100 dark:bg-zinc-800 px-1 rounded">MyPass2026!</code>）
             </p>
           )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
           <button
             type="submit"
@@ -160,7 +160,7 @@ function Spinner() {
 
 function LoadingOverlay({ mode }: { mode: Mode }) {
   return (
-    <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+    <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-900/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
       <svg
         className="animate-spin h-10 w-10 text-primary"
         xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +182,7 @@ function LoadingOverlay({ mode }: { mode: Mode }) {
           d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
         />
       </svg>
-      <p className="text-sm text-gray-700 font-semibold">
+      <p className="text-sm text-gray-700 dark:text-zinc-200 font-semibold">
         {mode === "signin" ? "ログインしています..." : "アカウントを作成しています..."}
       </p>
     </div>

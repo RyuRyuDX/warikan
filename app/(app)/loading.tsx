@@ -4,13 +4,13 @@ export default function Loading() {
   return (
     <div className="max-w-md mx-auto safe-top animate-pulse">
       <div className="px-5 pt-6 pb-4 flex items-center justify-center">
-        <div className="h-6 w-32 bg-gray-200 rounded" />
+        <div className="h-6 w-32 bg-gray-200 dark:bg-zinc-700 rounded" />
       </div>
-      <div className="mx-5 mb-6 h-28 bg-gray-100 rounded-2xl" />
+      <div className="mx-5 mb-6 h-28 bg-gray-100 dark:bg-zinc-800 rounded-2xl" />
       <div className="mx-5 space-y-3">
-        <div className="h-14 bg-gray-100 rounded-xl" />
-        <div className="h-14 bg-gray-100 rounded-xl" />
-        <div className="h-14 bg-gray-100 rounded-xl" />
+        <div className="h-14 bg-gray-100 dark:bg-zinc-800 rounded-xl" />
+        <div className="h-14 bg-gray-100 dark:bg-zinc-800 rounded-xl" />
+        <div className="h-14 bg-gray-100 dark:bg-zinc-800 rounded-xl" />
       </div>
     </div>
   );
