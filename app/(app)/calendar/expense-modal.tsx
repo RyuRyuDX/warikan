@@ -82,7 +82,7 @@ export default function ExpenseModal({
   const [payerId, setPayerId] = useState<string>(
     editing?.payer_user_id ?? currentUserId
   );
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(editing?.note ?? "");
   const [ratioMode, setRatioMode] = useState<RatioMode>(initialRatio.mode);
   const [customMe, setCustomMe] = useState<number>(initialRatio.customMe);
   const [saving, setSaving] = useState(false);

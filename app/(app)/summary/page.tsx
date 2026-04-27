@@ -36,7 +36,7 @@ export default async function SummaryPage() {
         .eq("couple_id", member.couple_id),
       supabase
         .from("expenses")
-        .select("id, date, amount, payer_user_id, ratio_override, category_id")
+        .select("id, date, amount, payer_user_id, ratio_override, category_id, note")
         .eq("couple_id", member.couple_id)
         .gte("date", format(monthStart, "yyyy-MM-dd"))
         .lte("date", format(monthEnd, "yyyy-MM-dd")),
