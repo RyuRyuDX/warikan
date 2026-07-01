@@ -50,8 +50,8 @@ export default function SettingsClient({
   const partner = members.find((m) => m.role === "partner");
   const inviteUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/invite/${inviteToken}`;
 
-  async function saveRatio(newRatio: number) {
-    setRatio(newRatio);
+  // ドラッグ確定時にのみ DB へ書き込む（onChange 連打で UPDATE が飛ぶのを防ぐ）
+  async function persistRatio(newRatio: number) {
     const supabase = createClient();
     await supabase
       .from("couples")
@@ -247,7 +247,9 @@ export default function SettingsClient({
             max={100}
             step={1}
             value={ownerPercent}
-            onChange={(e) => saveRatio(parseInt(e.target.value, 10) / 100)}
+            onChange={(e) => setRatio(parseInt(e.target.value, 10) / 100)}
+            onPointerUp={(e) => persistRatio(parseInt(e.currentTarget.value, 10) / 100)}
+            onKeyUp={(e) => persistRatio(parseInt(e.currentTarget.value, 10) / 100)}
             className="w-full accent-primary"
           />
           <div className="flex justify-between text-[10px] text-gray-500 dark:text-zinc-400 mt-2">
