@@ -46,8 +46,11 @@ export default function CalendarClient({
   const me = members.find((m) => m.user_id === currentUserId);
   const other = members.find((m) => m.user_id !== currentUserId);
 
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
+  // useMemo でメモ化しないと毎レンダーで新しい Date 参照が生まれ、
+  // 下の取得 useEffect が毎レンダー発火 → setExpenses → 再レンダー…と
+  // 無限フェッチループになる。currentMonth が変わった時のみ再計算する。
+  const monthStart = useMemo(() => startOfMonth(currentMonth), [currentMonth]);
+  const monthEnd = useMemo(() => endOfMonth(currentMonth), [currentMonth]);
 
   // 月の支出を取得
   useEffect(() => {
@@ -66,8 +69,10 @@ export default function CalendarClient({
 
   // 月次サマリー計算
   const settlement = useMemo(() => {
-    if (!owner || !partner) return null;
-    return calcSettlement(expenses, defaultRatio, owner.user_id, partner.user_id);
+    // パートナー未参加でも owner だけで集計を出す（summary 画面と挙動を揃える）。
+    // owner 不在時のみ null。
+    if (!owner) return null;
+    return calcSettlement(expenses, defaultRatio, owner.user_id, partner?.user_id ?? "");
   }, [expenses, defaultRatio, owner, partner]);
 
   // 自分視点の分担額（me が owner なら ownerShare、partner なら partnerShare）
