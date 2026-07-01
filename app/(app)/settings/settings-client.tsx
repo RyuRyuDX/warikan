@@ -23,6 +23,10 @@ export default function SettingsClient({
   const [ratio, setRatio] = useState(couple.default_ratio);
   const [inviteToken, setInviteToken] = useState(couple.invite_token);
   const [categories, setCategories] = useState(initialCategories);
+  const [addingCat, setAddingCat] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
+  const [confirmDeleteCatId, setConfirmDeleteCatId] = useState<string | null>(null);
+  const [catError, setCatError] = useState<string | null>(null);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberDisplayName, setMemberDisplayName] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -79,10 +83,11 @@ export default function SettingsClient({
   }
 
   async function addCategory() {
-    const name = prompt("カテゴリ名を入力");
+    const name = newCatName.trim();
     if (!name) return;
+    setCatError(null);
     const supabase = createClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("categories")
       .insert({
         couple_id: couple.id,
@@ -92,17 +97,38 @@ export default function SettingsClient({
       })
       .select()
       .single();
-    if (data) setCategories([...categories, data]);
+    if (error) {
+      setCatError(error.message);
+      return;
+    }
+    if (data) {
+      setCategories([...categories, data]);
+      setNewCatName("");
+      setAddingCat(false);
+    }
   }
 
   async function deleteCategory(id: string) {
-    if (!confirm("このカテゴリを削除しますか? 紐付いた支出があると削除できません。")) return;
+    // 支出はカテゴリ必須。最低 1 つは残す。
+    if (categories.length <= 1) {
+      setCatError("カテゴリは最低 1 つ必要です");
+      setConfirmDeleteCatId(null);
+      return;
+    }
+    setCatError(null);
     const supabase = createClient();
+    // アーカイブ方式のソフト削除。過去の支出はカテゴリ名/色を保持したまま残る。
     const { error } = await supabase
       .from("categories")
       .update({ archived: true })
       .eq("id", id);
-    if (!error) setCategories(categories.filter((c) => c.id !== id));
+    if (error) {
+      setCatError(error.message);
+      setConfirmDeleteCatId(null);
+      return;
+    }
+    setCategories(categories.filter((c) => c.id !== id));
+    setConfirmDeleteCatId(null);
   }
 
   async function logout() {
@@ -242,22 +268,83 @@ export default function SettingsClient({
                 style={{ backgroundColor: c.color }}
               />
               <span className="flex-1 text-sm">{c.name}</span>
-              <button
-                onClick={() => deleteCategory(c.id)}
-                className="text-xs text-red-500 dark:text-red-400 px-2"
-              >
-                削除
-              </button>
+              {confirmDeleteCatId === c.id ? (
+                <span className="flex items-center gap-1">
+                  <button
+                    onClick={() => setConfirmDeleteCatId(null)}
+                    className="text-xs text-gray-500 dark:text-zinc-400 px-2"
+                  >
+                    やめる
+                  </button>
+                  <button
+                    onClick={() => deleteCategory(c.id)}
+                    className="text-xs font-bold text-white bg-red-500 rounded-md px-2 py-1 active:opacity-80"
+                  >
+                    削除する
+                  </button>
+                </span>
+              ) : (
+                <button
+                  onClick={() => {
+                    setCatError(null);
+                    setConfirmDeleteCatId(c.id);
+                  }}
+                  className="text-xs text-red-500 dark:text-red-400 px-2"
+                >
+                  削除
+                </button>
+              )}
             </div>
           ))}
-          <button
-            onClick={addCategory}
-            className="flex items-center w-full p-3 text-primary text-sm font-bold"
-          >
-            <span className="text-lg mr-2">+</span>
-            新しいカテゴリを追加
-          </button>
+
+          {addingCat ? (
+            <div className="flex items-center gap-2 p-3">
+              <input
+                type="text"
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addCategory();
+                }}
+                placeholder="カテゴリ名"
+                maxLength={20}
+                className="flex-1 min-w-0 bg-white dark:bg-zinc-900 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                autoFocus
+              />
+              <button
+                onClick={() => {
+                  setAddingCat(false);
+                  setNewCatName("");
+                  setCatError(null);
+                }}
+                className="text-xs text-gray-500 dark:text-zinc-400 px-2 shrink-0"
+              >
+                やめる
+              </button>
+              <button
+                onClick={addCategory}
+                disabled={!newCatName.trim()}
+                className="text-xs font-bold text-white bg-primary rounded-md px-3 py-2 disabled:opacity-40 shrink-0 active:opacity-80"
+              >
+                追加
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setCatError(null);
+                setAddingCat(true);
+              }}
+              className="flex items-center w-full p-3 text-primary text-sm font-bold"
+            >
+              <span className="text-lg mr-2">+</span>
+              新しいカテゴリを追加
+            </button>
+          )}
         </div>
+        {catError && (
+          <p className="text-xs text-red-600 dark:text-red-400 mt-2 px-1">{catError}</p>
+        )}
       </Section>
 
       {/* 表示モード */}

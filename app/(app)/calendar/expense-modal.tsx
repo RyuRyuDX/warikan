@@ -87,6 +87,7 @@ export default function ExpenseModal({
   const [customMe, setCustomMe] = useState<number>(initialRatio.customMe);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const owner = members.find((m) => m.role === "owner");
   const partner = members.find((m) => m.role === "partner");
@@ -143,7 +144,6 @@ export default function ExpenseModal({
 
   async function handleDelete() {
     if (!editing) return;
-    if (!confirm("この支出を削除しますか?")) return;
     setSaving(true);
     const supabase = createClient();
     const { error } = await supabase
@@ -351,15 +351,33 @@ export default function ExpenseModal({
           {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
           {/* 削除ボタン (編集時のみ) */}
-          {editing && (
-            <button
-              onClick={handleDelete}
-              disabled={saving}
-              className="w-full py-3 text-red-600 dark:text-red-400 font-semibold border border-red-200 dark:border-red-900/40 rounded-xl active:bg-red-50 dark:active:bg-red-950/30"
-            >
-              この支出を削除
-            </button>
-          )}
+          {editing &&
+            (confirmingDelete ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setConfirmingDelete(false)}
+                  disabled={saving}
+                  className="flex-1 py-3 text-gray-600 dark:text-zinc-300 font-semibold border border-gray-200 dark:border-zinc-700 rounded-xl active:opacity-70 disabled:opacity-50"
+                >
+                  やめる
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={saving}
+                  className="flex-1 py-3 text-white font-bold bg-red-500 rounded-xl active:opacity-80 disabled:opacity-50"
+                >
+                  {saving ? "削除中..." : "削除する"}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmingDelete(true)}
+                disabled={saving}
+                className="w-full py-3 text-red-600 dark:text-red-400 font-semibold border border-red-200 dark:border-red-900/40 rounded-xl active:bg-red-50 dark:active:bg-red-950/30"
+              >
+                この支出を削除
+              </button>
+            ))}
         </div>
       </div>
     </div>
