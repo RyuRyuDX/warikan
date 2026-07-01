@@ -34,7 +34,13 @@ export default function LoginPage() {
     // 成功時は loading=true のまま遷移する。
     // setLoading(false) を呼ぶと、router.replace 完了までの数百 ms
     // 何も起きていないように見えてユーザーが画面を更新してしまう。
-    router.replace("/calendar");
+    // 招待リンク経由(未ログイン)で来た場合は、保存しておいた招待トークンの
+    // ページへ戻して join を完了させる。通常は /calendar へ。
+    const pendingInvite =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("pending_invite_token")
+        : null;
+    router.replace(pendingInvite ? `/invite/${pendingInvite}` : "/calendar");
     router.refresh();
   }
 
