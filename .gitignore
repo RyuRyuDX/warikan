@@ -11,3 +11,7 @@ coverage/
 .vercel
 next-env.d.ts
 *.tsbuildinfo
+
+# Claude Code のローカル個人設定・ロックファイル
+.claude/settings.local.json
+.claude/scheduled_tasks.lock

@@ -78,6 +78,31 @@ http://localhost:3000 を開いて、メールアドレス + パスワードで�
 
 ---
 
+## 開発ワークフロー
+
+コード変更は「ループ」で回す方針です（変更 → チェック → 修正を緑になるまで繰り返す）。
+
+### チェックコマンド
+
+| 種類 | コマンド |
+|---|---|
+| 型チェック | `npx tsc --noEmit` |
+| Lint | `npm run lint` |
+| RPC テスト | `bash supabase/tests/run_tests.sh`（ローカル Postgres 必要） |
+| 本番ビルド | `npm run build` |
+
+### Claude Code 用ハーネス
+
+このリポジトリには、AI 支援開発の品質を保つためのガードを同梱しています（`.claude/`）。
+
+- **Stop 検証ゲート** (`.claude/hooks/verify.sh`): 未コミットの `.ts/.tsx` 変更があるとき `tsc + lint` を実行し、赤いままの「完了」をブロックするフック。デフォルトでは未登録なので、使う場合は `CLAUDE.md` の手順で `.claude/settings.json` に登録してください。
+- **fixer サブエージェント** (`.claude/agents/fixer.md`): チェックが赤いときに呼ぶ修正専門エージェント。
+- **プロジェクト指示** (`CLAUDE.md`): 完了基準・チェックコマンド・コーディング規約をまとめています。
+
+`.claude/settings.local.json` と `.claude/scheduled_tasks.lock` は各自のローカル設定なので Git 管理対象外です。
+
+---
+
 ## GitHub にプッシュする手順
 
 ```bash
