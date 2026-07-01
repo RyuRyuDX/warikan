@@ -54,6 +54,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiI...
 
 Supabase ダッシュボードの **SQL Editor** を開き、`supabase/migrations/0001_initial.sql` の中身を全部コピペして実行。テーブル・RLS・RPC関数が一気に作られます。
 
+続けて `0002_fix_create_couple.sql`、`0003_harden_couple_members_rls.sql` も番号順に実行してください（RPC 修正・RLS 強化）。既に運用中の環境も、未適用のものを順に流せば追随できます。
+
 ### 5. 認証設定
 
 メールアドレス + パスワード認証を使います。
