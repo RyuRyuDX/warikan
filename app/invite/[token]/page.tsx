@@ -29,10 +29,25 @@ export default function InvitePage({
           window.localStorage.setItem("pending_invite_token", token);
         }
         setNeedsLogin(true);
+        setAuthChecking(false);
+        return;
+      }
+      // 既にカップルに所属している場合は join 不要。トークンを掃除して calendar へ。
+      const { data: member } = await supabase
+        .from("couple_members")
+        .select("couple_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (member) {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("pending_invite_token");
+        }
+        router.replace("/calendar");
+        return;
       }
       setAuthChecking(false);
     })();
-  }, [token]);
+  }, [token, router]);
 
   async function handleJoin() {
     setLoading(true);
@@ -46,6 +61,10 @@ export default function InvitePage({
     if (error) {
       setError(error.message);
     } else {
+      // 消費済みトークンを掃除（再ログイン時の誤リダイレクトを防ぐ）
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("pending_invite_token");
+      }
       router.push("/calendar");
     }
   }
