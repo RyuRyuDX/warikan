@@ -13,6 +13,7 @@ import {
   isSameMonth,
   isSameDay,
   getDay,
+  parseISO,
 } from "date-fns";
 import { ja } from "date-fns/locale";
 import { createClient } from "@/lib/supabase/client";
@@ -117,7 +118,7 @@ export default function CalendarClient({
 
   function openEditModal(expense: Expense) {
     setEditing(expense);
-    setSelectedDate(new Date(expense.date));
+    setSelectedDate(parseISO(expense.date));
     setModalOpen(true);
   }
 
@@ -137,7 +138,7 @@ export default function CalendarClient({
 
   // 選択日の支出
   const selectedDayExpenses = selectedDate
-    ? expenses.filter((e) => isSameDay(new Date(e.date), selectedDate))
+    ? expenses.filter((e) => isSameDay(parseISO(e.date), selectedDate))
     : [];
 
   return (
