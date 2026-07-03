@@ -1,0 +1,8 @@
+# コミット前ゲート: CI (ci.yml) およびローカル verify.sh と同一チェック
+pre-commit:
+  parallel: true
+  commands:
+    typecheck:
+      run: npx tsc --noEmit
+    lint:
+      run: npm run lint
