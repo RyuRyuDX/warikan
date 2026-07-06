@@ -10,14 +10,14 @@ truncate public.couple_members, public.categories, public.expenses,
          public.settlements, public.couples restart identity cascade;
 delete from auth.users;
 
-\echo '--- Test 1: create_couple as りゅうすけ ---'
+\echo '--- Test 1: create_couple as オーナー ---'
 
 insert into auth.users (id, email)
-  values ('11111111-1111-1111-1111-111111111111', 'gibson.red.gin.suke@gmail.com');
+  values ('11111111-1111-1111-1111-111111111111', 'owner@example.com');
 
 set app.current_user_id = '11111111-1111-1111-1111-111111111111';
 
-select public.create_couple('りゅうすけ') as new_couple_id \gset
+select public.create_couple('オーナー') as new_couple_id \gset
 
 -- couple_members に owner として登録されていること
 do $$
@@ -26,11 +26,11 @@ begin
   select count(*) into v_count from public.couple_members
     where user_id = '11111111-1111-1111-1111-111111111111'
       and role = 'owner'
-      and display_name = 'りゅうすけ';
+      and display_name = 'オーナー';
   if v_count <> 1 then
     raise exception 'TEST FAILED: couple_members rows = %, expected 1', v_count;
   end if;
-  raise notice 'TEST OK: couple_members に owner=りゅうすけ が登録された';
+  raise notice 'TEST OK: couple_members に owner=オーナー が登録された';
 end $$;
 
 -- デフォルトカテゴリ 6 件がシードされていること
@@ -50,7 +50,7 @@ end $$;
 
 do $$
 begin
-  perform public.create_couple('りゅうすけ2');
+  perform public.create_couple('オーナー2');
   raise exception 'TEST FAILED: 二重作成が許可された';
 exception when others then
   if sqlerrm like '%already in a couple%' then
