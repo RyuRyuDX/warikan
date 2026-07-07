@@ -1,0 +1,28 @@
+name: CI
+
+# ローカルの品質ゲート (Claude Code Stop フック verify.sh = tsc + lint) と
+# 同じチェックを GitHub 側でも実施し、手動 push でも品質を担保する。
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: typecheck
+        run: npx tsc --noEmit
+      - name: lint
+        run: npm run lint
